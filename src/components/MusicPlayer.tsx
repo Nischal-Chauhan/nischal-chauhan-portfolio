@@ -69,7 +69,7 @@ export default function MusicPlayer() {
 
     return (
         <>
-            <audio ref={audioRef} src="/music/track.m4a" loop preload="auto" />
+            <audio ref={audioRef} src="/music/portfolio-ambient.mp3" loop preload="auto" />
             <button
                 onClick={toggle}
                 aria-label={playing ? "Pause music" : "Play music"}
