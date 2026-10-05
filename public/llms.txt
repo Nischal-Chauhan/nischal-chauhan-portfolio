@@ -1,0 +1,23 @@
+# Nischal Chauhan
+
+> Nischal Chauhan is an AI & Python Developer based in Ahmedabad, Gujarat, India. His resume lists experience in Python, machine learning, deep learning, computer vision, application deployment, Linux server administration, Docker, Nginx, Apache, SSL, SMTP, and CI/CD workflows.
+
+## Portfolio sections
+- [Home](/): Overview of Nischal Chauhan and selected work.
+- [Work](/work): Resume-supported projects.
+- [About](/about): Professional background, skills, and education.
+- [Services](/services): Technical focus areas.
+- [Journal](/journal): Technical notes, when published.
+- [Contact](/contact): Contact information.
+
+## Selected projects
+- [Face-Recognition Attendance System](/work/face-recognition-attendance-system): Minor project listed on the resume.
+- [Safety Hazard Detection](/work/safety-hazard-detection): Project listed as part of a four-month internship.
+
+## Contact
+- Email: chauhannischal311@gmail.com
+- Location: Ahmedabad, Gujarat, India
+- LinkedIn: https://www.linkedin.com/in/nischal-chauhan
+- GitHub: https://github.com/Nischal-Chauhan
+
+No project metrics, public demos, or implementation details are claimed unless explicitly listed above.

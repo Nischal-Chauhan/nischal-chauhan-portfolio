@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <rect width="1600" height="900" fill="#e8e2d8"/>
+  <rect x="64.0" y="54.0" width="1472.0" height="792.0" fill="none" stroke="#241a10" stroke-opacity="0.25" stroke-width="2" stroke-dasharray="10 8"/>
+  <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-family="Georgia, serif" font-style="italic" font-size="63" fill="#241a10" fill-opacity="0.65">Article One</text>
+  <text x="50%" y="531.0" text-anchor="middle" dominant-baseline="middle" font-family="Helvetica, Arial, sans-serif" font-size="25" letter-spacing="3" fill="#241a10" fill-opacity="0.4">REPLACE WITH YOUR OWN IMAGE</text>
+</svg>
