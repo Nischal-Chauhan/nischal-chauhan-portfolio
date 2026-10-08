@@ -31,7 +31,9 @@ export default function robots(): MetadataRoute.Robots {
             {
                 userAgent: "*",
                 allow: "/",
-                disallow: ["/api/", "/_next/"],
+                // /_next/ is deliberately NOT disallowed: Googlebot needs /_next/static
+                // CSS/JS to render pages. /api/ serves no crawlable content.
+                disallow: ["/api/"],
             },
             {
                 userAgent: AI_CRAWLERS,

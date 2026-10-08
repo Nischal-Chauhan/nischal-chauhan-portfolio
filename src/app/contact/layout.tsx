@@ -12,6 +12,16 @@ export const metadata: Metadata = {
         description:
             "Contact Nischal Chauhan, AI & Python Developer. Email: chauhannischal311@gmail.com",
         url: "/contact",
+        // Section-level openGraph replaces the root object (shallow merge), so
+        // the generated PNG must be referenced here explicitly.
+        images: [
+            {
+                url: "/opengraph-image",
+                width: 1200,
+                height: 630,
+                alt: "Nischal Chauhan — AI & Python Developer portfolio",
+            },
+        ],
     },
 };
 

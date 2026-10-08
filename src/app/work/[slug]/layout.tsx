@@ -34,8 +34,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
                 ? [
                     {
                         url: heroImage,
-                        width: 1200,
-                        height: 630,
                         alt: title,
                     },
                 ]
