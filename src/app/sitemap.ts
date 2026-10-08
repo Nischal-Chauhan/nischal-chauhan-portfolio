@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { projectsData } from "@/data/projects";
 
 export default function sitemap(): MetadataRoute.Sitemap {
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -9,7 +10,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
             lastModified: new Date(),
             changeFrequency: "monthly" as const,
             priority: 1.0,
-            images: [`${baseUrl}/images/profile-placeholder.svg`],
         },
         {
             url: `${baseUrl}/work`,
@@ -22,7 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
             lastModified: new Date(),
             changeFrequency: "monthly" as const,
             priority: 0.8,
-            images: [`${baseUrl}/images/profile-placeholder.svg`],
+            images: [`${baseUrl}/images/Me.jpeg`],
         },
         {
             url: `${baseUrl}/services`,
@@ -44,10 +44,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
         },
     ];
 
-    const projectSlugs = [
-        "face-recognition-attendance-system",
-        "safety-hazard-detection",
-    ];
+    // Derive project pages from the single source of truth so the sitemap
+    // never drifts from the data set.
+    const projectSlugs = projectsData.map((project) => project.slug);
 
     const projectPages = projectSlugs.map((slug) => ({
         url: `${baseUrl}/work/${slug}`,

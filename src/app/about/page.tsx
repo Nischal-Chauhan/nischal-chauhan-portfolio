@@ -63,9 +63,9 @@ export default function About() {
                         <div className="lg:col-span-5 w-full max-w-sm sm:max-w-md lg:max-w-none mx-auto aspect-[3/4] overflow-hidden grayscale hover:grayscale-0 transition-all duration-700 rounded-lg bg-neutral-200">
                             <Image
                                 src="/images/Me.jpeg"
-                                alt="Nischal Chauhan — AI & Python Developer"
-                                width={1086}
-                                height={1448}
+                                alt="Black-and-white portrait of Nischal Chauhan, AI & Python Developer, wearing glasses and a dark suit, standing by a window"
+                                width={853}
+                                height={1280}
                                 className="hero-image w-full h-full object-cover object-top"
                             />
                         </div>
