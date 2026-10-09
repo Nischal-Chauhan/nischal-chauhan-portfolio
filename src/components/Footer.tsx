@@ -1,4 +1,22 @@
+"use client";
+
+import Link from "next/link";
+import { isAnalyticsConfigured } from "@/components/ConsentBanner";
+
+// The "Cookie Settings" button reopens the analytics consent banner
+// (ConsentBanner listens for this event), letting visitors change or
+// withdraw their analytics decision at any time.
+const CONSENT_SETTINGS_EVENT = "nischal-consent-settings";
+
 export default function Footer() {
+    // Shown only when analytics is actually configured: without a real GA4
+    // measurement id the banner never opens, so the control would appear
+    // broken. NEXT_PUBLIC_ vars are inlined at build time, identically on the
+    // server and the client — no hydration mismatch.
+    const analyticsConfigured = isAnalyticsConfigured(
+        process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
+    );
+
     return (
         <footer className="w-full p-0 bg-black overflow-hidden relative">
             <div className="w-full flex flex-col justify-between h-full py-10 md:py-16 px-6 md:px-20">
@@ -40,6 +58,23 @@ export default function Footer() {
                             LinkedIn
                         </a>
                         <a className="hover:text-white transition-colors uppercase text-xs md:text-sm font-medium tracking-widest" href="https://github.com/Nischal-Chauhan" target="_blank" rel="noopener noreferrer">GitHub</a>
+                        <Link
+                            className="hover:text-white transition-colors uppercase text-xs md:text-sm font-medium tracking-widest"
+                            href="/privacy"
+                        >
+                            Privacy Policy
+                        </Link>
+                        {analyticsConfigured && (
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    window.dispatchEvent(new Event(CONSENT_SETTINGS_EVENT))
+                                }
+                                className="uppercase text-xs md:text-sm font-medium tracking-widest hover:text-white transition-colors cursor-none"
+                            >
+                                Cookie Settings
+                            </button>
+                        )}
                     </div>
                     <div className="text-right">
                         {/* Copyright removed */}

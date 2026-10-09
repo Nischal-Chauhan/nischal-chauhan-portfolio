@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -13,6 +14,10 @@ export default function Contact() {
     const [formData, setFormData] = useState({ name: "", email: "", message: "" });
     const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
     const [errorMsg, setErrorMsg] = useState("");
+    // Guards against accidental duplicate submissions (e.g. an already
+    // disabled submit button still triggering via keyboard or racing clicks).
+    const submittingRef = useRef(false);
+    const router = useRouter();
 
     useGSAP(
         () => {
@@ -38,40 +43,52 @@ export default function Contact() {
         { scope: container, revertOnUpdate: true }
     );
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        if (submittingRef.current) return;
+        submittingRef.current = true;
         setStatus("sending");
         setErrorMsg("");
 
         try {
-            // Replace with your own email — formsubmit.co relays form submissions to it.
-            const res = await fetch("https://formsubmit.co/ajax/chauhannischal311@gmail.com", {
+            // The honeypot is an uncontrolled input: bots that autofill the
+            // DOM do not fire React onChange, so the real submitted value is
+            // read from the form elements here. The server silently drops
+            // submissions where this field carries text.
+            const form = e.currentTarget;
+            const honeypotEl = form.elements.namedItem("honeypot");
+            const honeypotValue = honeypotEl instanceof HTMLInputElement ? honeypotEl.value : "";
+
+            const res = await fetch("/api/contact", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Accept": "application/json",
                 },
                 body: JSON.stringify({
                     name: formData.name,
                     email: formData.email,
                     message: formData.message,
-                    _subject: `New inquiry from ${formData.name} — Nischal Chauhan portfolio`,
-                    _template: "table",
+                    honeypot: honeypotValue,
                 }),
             });
 
-            const data = await res.json();
+            const data = await res.json().catch(() => null);
 
-            if (data.success === "true" || data.success === true) {
+            if (res.ok && data?.success === true) {
                 setStatus("success");
-                setFormData({ name: "", email: "", message: "" });
+                router.push("/thank-you");
             } else {
                 setStatus("error");
-                setErrorMsg(data.message || "Something went wrong. Please try again.");
+                setErrorMsg(
+                    (data && typeof data.error === "string" && data.error) ||
+                        "Something went wrong. Please try again."
+                );
             }
         } catch {
             setStatus("error");
             setErrorMsg("Network error. Please try again.");
+        } finally {
+            submittingRef.current = false;
         }
     };
 
@@ -105,8 +122,22 @@ export default function Contact() {
                             </div>
                         ) : (
                             <form className="flex flex-col gap-12" onSubmit={handleSubmit}>
+                                {/* Honeypot: visually hidden from human visitors and removed
+                                    from the accessibility tree; bots that autofill every
+                                    field will reveal themselves here. */}
+                                <div className="hidden" aria-hidden="true">
+                                    <label htmlFor="contact-honeypot">Company website</label>
+                                    <input
+                                        id="contact-honeypot"
+                                        name="honeypot"
+                                        type="text"
+                                        tabIndex={-1}
+                                        autoComplete="off"
+                                        defaultValue=""
+                                    />
+                                </div>
                                 <div className="group relative">
-                                    <label className="block text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-2">
+                                    <label htmlFor="contact-name" className="block text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-2">
                                         01/ Name
                                     </label>
                                     <input
@@ -114,13 +145,18 @@ export default function Contact() {
                                         placeholder="Your name"
                                         name="name"
                                         type="text"
+                                        id="contact-name"
                                         required
+                                        maxLength={100}
+                                        autoComplete="name"
+                                        aria-invalid={status === "error"}
+                                        aria-describedby="contact-form-status"
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     />
                                 </div>
                                 <div className="group relative">
-                                    <label className="block text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-2">
+                                    <label htmlFor="contact-email" className="block text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-2">
                                         02/ Email Address
                                     </label>
                                     <input
@@ -128,13 +164,18 @@ export default function Contact() {
                                         placeholder="email@example.com"
                                         name="email"
                                         type="email"
+                                        id="contact-email"
                                         required
+                                        maxLength={254}
+                                        autoComplete="email"
+                                        aria-invalid={status === "error"}
+                                        aria-describedby="contact-form-status"
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                     />
                                 </div>
                                 <div className="group relative">
-                                    <label className="block text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-2">
+                                    <label htmlFor="contact-message" className="block text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-2">
                                         03/ Message
                                     </label>
                                     <textarea
@@ -142,15 +183,28 @@ export default function Contact() {
                                         placeholder="Tell me about your project"
                                         name="message"
                                         rows={4}
+                                        id="contact-message"
                                         required
+                                        maxLength={2000}
+                                        aria-invalid={status === "error"}
+                                        aria-describedby="contact-form-status"
                                         value={formData.message}
                                         onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                                     ></textarea>
                                 </div>
 
-                                {status === "error" && (
-                                    <p className="text-red-500 text-sm">{errorMsg}</p>
-                                )}
+                                {/* Accessible status region: screen readers announce
+                                    errors and the sending state as they change. */}
+                                <div id="contact-form-status" role="status" aria-live="polite">
+                                    {status === "error" && (
+                                        <p className="text-red-500 text-sm" role="alert">
+                                            {errorMsg}
+                                        </p>
+                                    )}
+                                    <p className={status === "sending" ? "text-slate-500 text-sm" : "sr-only"}>
+                                        {status === "sending" ? "Sending your message…" : ""}
+                                    </p>
+                                </div>
 
                                 <div className="pt-4">
                                     <CreativeButton type="submit" disabled={status === "sending"} tone="dark" className="px-10 py-5">
