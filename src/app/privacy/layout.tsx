@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
     title: "Privacy Policy",
     description:
-        "How this portfolio collects, uses, and forwards contact-form data, and how analytics consent is handled.",
+        "How this portfolio handles contact-form data, hosting, and privacy requests.",
     alternates: {
         canonical: "/privacy",
     },
