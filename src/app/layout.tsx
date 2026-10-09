@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import CustomCursor from "@/components/CustomCursor";
 import Loader from "@/components/Loader";
 import MusicPlayer from "@/components/MusicPlayer";
+import ConsentBanner from "@/components/ConsentBanner";
 
 const notoSerifDisplay = Noto_Serif_Display({
   variable: "--font-display-next",
@@ -161,6 +162,8 @@ export default function RootLayout({
         <Navigation />
         <div className="flex-1 flex flex-col w-full">{children}</div>
         <Footer />
+        {/* Optional GA4 + consent UI. Loads nothing until the visitor accepts. */}
+        <ConsentBanner />
       </body>
     </html>
   );
