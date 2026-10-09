@@ -9,6 +9,76 @@ import CreativeButton from "@/components/CreativeButton";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
+// --- Web3Forms direct browser submission (Free plan) -----------------------
+// Web3Forms' API is designed to be called from the browser for spam
+// prevention; server-side proxying requires a paid plan and can return 403
+// (docs.web3forms.com/getting-started/troubleshooting). The access key is a
+// public key safe for client-side use — it is not a server secret.
+const WEB3FORMS_ENDPOINT = "https://api.web3forms.com/submit";
+const ACCESS_KEY_PLACEHOLDER = "your_web3forms_access_key";
+
+const accessKey = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY?.trim();
+// Reject missing values and the .env.example placeholder: never POST with an
+// empty or obviously unconfigured key.
+const accessKeyConfigured = Boolean(accessKey) && accessKey !== ACCESS_KEY_PLACEHOLDER;
+
+// Client-side validation mirrors the limits the form previously enforced in
+// its API route (name 1–100, email ≤254 with format check, message 10–2000,
+// all measured on trimmed values). NOTE: client-side validation and the
+// honeypot are convenience spam deterrents that can be bypassed; direct
+// submissions have no trusted server-side validation or rate limiting.
+const NAME_MIN = 1;
+const NAME_MAX = 100;
+const EMAIL_MAX = 254;
+const EMAIL_LOCAL_MAX = 64;
+const MESSAGE_MIN = 10;
+const MESSAGE_MAX = 2000;
+
+/** Same pragmatic email check the API route used (single @, non-empty parts,
+ * no consecutive dots, empty labels, or 1-char/non-alphabetic TLD). */
+function isValidEmail(email: string): boolean {
+    const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!pattern.test(email)) return false;
+
+    const at = email.indexOf("@");
+    const local = email.slice(0, at);
+    const domain = email.slice(at + 1);
+
+    if (local.length > EMAIL_LOCAL_MAX) return false;
+    if (local.startsWith(".") || local.endsWith(".") || local.includes("..")) {
+        return false;
+    }
+
+    if (domain.includes("..")) return false;
+    const labels = domain.split(".");
+    if (labels.some((label) => label.length === 0)) return false;
+    const tld = labels[labels.length - 1];
+    if (!/^[A-Za-z]{2,}$/.test(tld)) return false;
+
+    return true;
+}
+
+function validateContactFields(fields: {
+    name: string;
+    email: string;
+    message: string;
+}): string | null {
+    if (fields.name.length < NAME_MIN || fields.name.length > NAME_MAX) {
+        return "Please enter your name (up to 100 characters).";
+    }
+    if (
+        fields.email.length === 0 ||
+        fields.email.length > EMAIL_MAX ||
+        !isValidEmail(fields.email)
+    ) {
+        return "Please enter a valid email address (up to 254 characters).";
+    }
+    if (fields.message.length < MESSAGE_MIN || fields.message.length > MESSAGE_MAX) {
+        return "Message must be between 10 and 2000 characters.";
+    }
+    return null;
+}
+
 export default function Contact() {
     const container = useRef<HTMLDivElement>(null);
     const [formData, setFormData] = useState({ name: "", email: "", message: "" });
@@ -51,42 +121,95 @@ export default function Contact() {
         setErrorMsg("");
 
         try {
-            // The honeypot is an uncontrolled input: bots that autofill the
-            // DOM do not fire React onChange, so the real submitted value is
-            // read from the form elements here. The server silently drops
-            // submissions where this field carries text.
+            // Uncontrolled inputs: the real submitted values are read from the
+            // form elements, since bots that autofill the DOM do not fire
+            // React onChange.
             const form = e.currentTarget;
+
             const honeypotEl = form.elements.namedItem("honeypot");
             const honeypotValue = honeypotEl instanceof HTMLInputElement ? honeypotEl.value : "";
 
-            const res = await fetch("/api/contact", {
+            // Honeypot filled → automated submission. Do not contact
+            // Web3Forms; silently show a success-shaped outcome so bots learn
+            // nothing. Humans never see this field, so real visitors are
+            // unaffected.
+            if (honeypotValue.trim().length > 0) {
+                setStatus("success");
+                router.push("/thank-you");
+                return;
+            }
+
+            // Web3Forms' own spam protection: a hidden checkbox that
+            // documentation requires to exist with display:none. Bots that
+            // check every input get rejected by Web3Forms.
+            const botcheckEl = form.elements.namedItem("botcheck");
+            const botcheckChecked = botcheckEl instanceof HTMLInputElement && botcheckEl.checked;
+
+            // Validate BEFORE any network request.
+            const validationError = validateContactFields({
+                name: formData.name.trim(),
+                email: formData.email.trim(),
+                message: formData.message.trim(),
+            });
+            if (validationError) {
+                setStatus("error");
+                setErrorMsg(validationError);
+                return;
+            }
+
+            // Missing public access key: fail fast with a clear message
+            // instead of sending an unusable request.
+            if (!accessKeyConfigured) {
+                setStatus("error");
+                setErrorMsg(
+                    "The contact form is not configured correctly. Please email me directly instead."
+                );
+                return;
+            }
+
+            const res = await fetch(WEB3FORMS_ENDPOINT, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    Accept: "application/json",
                 },
                 body: JSON.stringify({
-                    name: formData.name,
-                    email: formData.email,
-                    message: formData.message,
-                    honeypot: honeypotValue,
+                    access_key: accessKey,
+                    subject: `New inquiry from ${formData.name.trim()} — Nischal Chauhan portfolio`,
+                    from_name: formData.name.trim(),
+                    email: formData.email.trim(),
+                    replyto: formData.email.trim(),
+                    message: formData.message.trim(),
+                    botcheck: botcheckChecked,
                 }),
             });
 
+            // Only a confirmed success:true response counts. Never navigate to
+            // /thank-you on an HTTP error, a success:false payload, invalid
+            // JSON, or a network failure.
             const data = await res.json().catch(() => null);
 
-            if (res.ok && data?.success === true) {
+            if (res.ok && data && typeof data === "object" && (data as { success?: unknown }).success === true) {
                 setStatus("success");
                 router.push("/thank-you");
             } else {
                 setStatus("error");
+                const providerMessage =
+                    data &&
+                    typeof data === "object" &&
+                    typeof (data as { body?: { message?: unknown } }).body?.message === "string"
+                        ? (data as { body: { message: string } }).body.message
+                        : typeof (data as { message?: unknown } | null)?.message === "string"
+                          ? (data as { message: string }).message
+                          : "";
                 setErrorMsg(
-                    (data && typeof data.error === "string" && data.error) ||
-                        "Something went wrong. Please try again."
+                    providerMessage ||
+                        "Sorry, the message could not be sent. Please try again or email me directly."
                 );
             }
         } catch {
             setStatus("error");
-            setErrorMsg("Network error. Please try again.");
+            setErrorMsg("Network error. Please check your connection and try again.");
         } finally {
             submittingRef.current = false;
         }
@@ -134,6 +257,17 @@ export default function Contact() {
                                         tabIndex={-1}
                                         autoComplete="off"
                                         defaultValue=""
+                                    />
+                                    {/* Web3Forms' documented spam protection: a
+                                        display:none checkbox; bots that check
+                                        every input are rejected upstream. */}
+                                    <input
+                                        type="checkbox"
+                                        name="botcheck"
+                                        tabIndex={-1}
+                                        autoComplete="off"
+                                        style={{ display: "none" }}
+                                        aria-hidden="true"
                                     />
                                 </div>
                                 <div className="group relative">

@@ -42,12 +42,13 @@ export default function PrivacyPolicy() {
                             Where form submissions go
                         </h2>
                         <p>
-                            When you submit the contact form, the form data is sent through the
-                            website&apos;s secure server route and relayed to Web3Forms, an
-                            email-delivery service, which delivers your message to my email inbox:
-                            chauhannischal311@gmail.com. Web3Forms processes the form data solely
-                            for the purpose of completing that delivery. A copy of your name, email
-                            address, and message therefore sits in my email inbox once delivered.
+                            Your name, email address, and message are transmitted directly from
+                            your browser to Web3Forms, an email-delivery service, which delivers
+                            your message to my email inbox: chauhannischal311@gmail.com. The
+                            submission is not sent through a server route on this website first.
+                            Web3Forms processes the form data solely for the purpose of
+                            completing that delivery. A copy of your name, email address, and
+                            message therefore sits in my email inbox once delivered.
                         </p>
                     </section>
 
