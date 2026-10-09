@@ -42,12 +42,13 @@ export default function PrivacyPolicy() {
                             Where form submissions go
                         </h2>
                         <p>
-                            When you submit the contact form, the form data is sent through the
-                            website&apos;s secure server route and relayed to Web3Forms, an
-                            email-delivery service, which delivers your message to my email inbox:
-                            chauhannischal311@gmail.com. Web3Forms processes the form data solely
-                            for the purpose of completing that delivery. A copy of your name, email
-                            address, and message therefore sits in my email inbox once delivered.
+                            Your name, email address, and message are transmitted directly from
+                            your browser to Web3Forms, an email-delivery service, which delivers
+                            your message to my email inbox: chauhannischal311@gmail.com. The
+                            submission is not sent through a server route on this website first.
+                            Web3Forms processes the form data solely for the purpose of
+                            completing that delivery. A copy of your name, email address, and
+                            message therefore sits in my email inbox once delivered.
                         </p>
                     </section>
 
@@ -68,40 +69,26 @@ export default function PrivacyPolicy() {
                         <h2 className="text-xs uppercase tracking-[0.3em] text-slate-400 mb-4 font-bold">
                             Analytics
                         </h2>
-                        <p className="mb-4">
-                            This site offers optional, consent-based analytics.
+                        <p>
+                            This website does not use analytics services. No Google Analytics or
+                            other analytics or advertising tracking is loaded, and no
+                            analytics consent banner is shown. This site does not set its own
+                            tracking cookies; note that the hosting platform described above
+                            may set cookies of its own under its own policies.
                         </p>
-                        <ul className="list-disc pl-6 space-y-2">
-                            <li>
-                                If you have not yet made a choice, no analytics are loaded and nothing
-                                is measured. Closing the banner without choosing is not consent.
-                            </li>
-                            <li>
-                                If you accept, Google Analytics loads and collects standard usage
-                                data, which involves analytics cookies being set in your browser.
-                            </li>
-                            <li>
-                                If you decline, no analytics script loads and no analytics data is
-                                sent.
-                            </li>
-                            <li>
-                                You can change your choice at any time via the “Cookie Settings”
-                                control in the footer. If you withdraw consent, further analytics
-                                collection is stopped as far as the implementation permits; note that
-                                analytics cookies previously set by Google Analytics are managed by
-                                your browser and may remain until you clear them.
-                            </li>
-                        </ul>
                     </section>
 
                     <section>
                         <h2 className="text-xs uppercase tracking-[0.3em] text-slate-400 mb-4 font-bold">
-                            Your preferences and browser storage
+                            Browser storage
                         </h2>
                         <p>
-                            Your analytics choice is stored in your browser&apos;s local storage on
-                            your own device, so the site remembers it between visits. It is not sent
-                            anywhere and is not shared with anyone.
+                            This site does not use cookies of its own and does not store form
+                            data in your browser. The only browser storage it creates is a
+                            short-lived flag in your browser&apos;s session storage when the
+                            opening animation plays, used so the intro does not replay on
+                            every page of the same visit. It contains no personal information
+                            and is not sent anywhere.
                         </p>
                     </section>
 
